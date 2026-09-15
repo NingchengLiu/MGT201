@@ -1,0 +1,55 @@
+name: Add course images
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-images.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  add-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download images from Google Drive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 'https://drive.usercontent.google.com/download?id=1_VPZjOOHgDwPpm8ES91TxqxK9WrVCTW8&export=download&confirm=t' -o 1.jpg
+          curl -L --fail --retry 3 'https://drive.usercontent.google.com/download?id=1hP6pi5kIbBit7J2iOK2AJURfzClJ7lB8&export=download&confirm=t' -o 2.jpg
+          curl -L --fail --retry 3 'https://drive.usercontent.google.com/download?id=1Pnh2Rbt8tQJi23TdzNMhJfuxOvNV6AhL&export=download&confirm=t' -o 3.jpg
+          curl -L --fail --retry 3 'https://drive.usercontent.google.com/download?id=12YqW5PrYhoAaYzF3vCYNqYeoBz1hUqSN&export=download&confirm=t' -o 4.jpg
+          curl -L --fail --retry 3 'https://drive.usercontent.google.com/download?id=1Tf9Y_PNGzcWHHl0p10NtUWfPIgHt7ZfT&export=download&confirm=t' -o 5.jpg
+
+      - name: Verify exact image files
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > checksums.sha256 <<'EOF'
+          bd3d2c6622d8aa10aa23a610eef809d36520bd1b8f9ebe87b0813f0e8fca6746  1.jpg
+          e7737b45078ffecb47efe5398ecd0d35a3bca918f9fe21774d095c984d8418dc  2.jpg
+          d482ce9fea81f5974e336cd5fea33cc45448846db6691edf445fe72dfbf2d493  3.jpg
+          e8e89994e669be5d2cf8b2be19fd63f8b2c8b36541aefff67fb7486db77fe422  4.jpg
+          361cc6d35d4850b860f167cfcce2b6103adcc1a41925f2ef3945c12cc0a6b62a  5.jpg
+          EOF
+          sha256sum -c checksums.sha256
+          rm checksums.sha256
+
+      - name: Commit images
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 1.jpg 2.jpg 3.jpg 4.jpg 5.jpg
+          if git diff --cached --quiet; then
+            echo 'Images are already up to date.'
+          else
+            git commit -m 'Add whiteboard images'
+            git push origin HEAD:main
+          fi
