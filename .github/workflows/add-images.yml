@@ -1,9 +1,8 @@
 name: Add course images
 
 on:
-  push:
-    paths:
-      - '.github/workflows/add-images.yml'
+  issues:
+    types: [opened]
   workflow_dispatch:
 
 permissions:
@@ -11,6 +10,7 @@ permissions:
 
 jobs:
   add-images:
+    if: github.event_name == 'workflow_dispatch' || github.event.issue.title == 'Trigger image import'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
